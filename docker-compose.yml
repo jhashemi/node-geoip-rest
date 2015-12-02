@@ -1,0 +1,6 @@
+geoip:
+  build: .
+  ports:
+   - "3000:3000"
+  volumes:
+   - "./callstatsGeoIP/:/callstats/geoip"
