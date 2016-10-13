@@ -32,5 +32,11 @@ if [[ "x$GEO_IP_ISP6_URL" != "x" ]]; then
 fi
 
 cd /callstats/geoip
+
+# Get the new GeoIP ISP file
+if [[ "x$GEO_IP2_ISP_URL" != "x" ]]; then
+    curl -o GeoIP2-ISP.mmdb ${GEO_IP2_ISP_URL}
+fi
+
 #start the geoip service
 npm start
