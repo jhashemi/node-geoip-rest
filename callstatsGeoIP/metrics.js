@@ -16,7 +16,7 @@ var MetricServer = function() {
 
     var httpProcessingTime = new Histogram({
         name: "http_response_time",
-        help: "response time for cs-rest-api request handling",
+        help: "response time for request handling",
         labelNames: ["event_type", "status_code"],
         register: [],
         buckets: [10, 25, 50, 100, 250, 500, 1000, 2000, 4000, 8000],
@@ -25,7 +25,7 @@ var MetricServer = function() {
 
     var httpRequestCounter = new Counter({
         name: "http_request_count",
-        help: "http request counter for the cs-rest-api module",
+        help: "http request counter",
         labelNames: ["event_type"],
         register: [],
     });
