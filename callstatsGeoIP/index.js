@@ -1,14 +1,32 @@
+/*jslint node: true */
+"use strict";
+
 var geoipLite = require('geoip-lite');
 var express = require('express');
 var validators = require('validators');
 var app = express();
 
 var maxmind = require('maxmind');
-var geoip = maxmind.open('GeoIP2-ISP.mmdb');
+var geoip = maxmind.openSync('GeoIP2-ISP.mmdb');
 
-app.get('/lookup/:ip', function (req, res) {
+// scream before crash
+process.on('uncaughtException', function(err) {
+    var errorMsg = (new Date()).toUTCString() + ' uncaughtException: ' + err.message;
+    console.error(errorMsg);
+    console.error(err.stack);
+    process.exit(1);
+});
+
+// the metric collection and reporting service
+var Metrics = require("./metrics.js");
+var metricServer = Metrics.MetricServer();
+
+// add the metrics tracking middleware for handling request
+app.use(metricServer.addRequestTime);
+
+app.get('/lookup/:ip', function (req, res, next) {
     try {
-        validators.validateIPv46Address(req.params.ip)
+        validators.validateIPv46Address(req.params.ip);
     } catch (error) {
         res.set('Content-Type','application/json');
         res.status(400).send(JSON.stringify({error: 'Bad request, IP address not valid'}));
@@ -17,7 +35,7 @@ app.get('/lookup/:ip', function (req, res) {
 
     // IP -> geolocation
     var lookupResult = geoipLite.lookup(req.params.ip);
-    // ISP from the IP
+    // IP -> ISP info
     var isp = geoip.get(req.params.ip);
 
     if (lookupResult || isp) {
@@ -28,8 +46,16 @@ app.get('/lookup/:ip', function (req, res) {
         res.set('Content-Type','application/json');
         res.status(404).send(JSON.stringify({error: 'NOT FOUND'}));
     }
+
+    // call the next route handler or middleware
+    next();
 });
 
+
+// add the metrics tracking middleware for response handling
+app.use(metricServer.measureResponseTime);
+
+// start geoip service
 var server = app.listen(3000, function () {
     var host = server.address().address;
     var port = server.address().port;
@@ -37,3 +63,5 @@ var server = app.listen(3000, function () {
     console.log('Callstats: Geo micro service listening at http://%s:%s', host, port);
 });
 
+// start serving metrics reporting
+metricServer.startServer();

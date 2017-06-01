@@ -2,5 +2,13 @@ geoip:
   build: .
   ports:
    - "3000:3000"
-  volumes:
-   - "./callstatsGeoIP/:/callstats/geoip"
+   - "9399:9399"
+  # volumes:
+  #  - "./callstatsGeoIP/:/callstats/geoip"
+  environment:
+    GEO_IP2_ISP_URL: "https://s3-eu-west-1.amazonaws.com/artifactstorecsio/geoipdata/GeoIP2-ISP.mmdb"
+    GEO_IP_CITY_URL: "https://s3-eu-west-1.amazonaws.com/artifactstorecsio/geoipdata/geoip-city.dat"
+    GEO_IP_CITY_NAMES_URL: "https://s3-eu-west-1.amazonaws.com/artifactstorecsio/geoipdata/geoip-city-names.dat"
+    GEO_IP_CITY6_URL: "https://s3-eu-west-1.amazonaws.com/artifactstorecsio/geoipdata/geoip-city6.dat"
+    GEO_IP_CITY_COUNTRY_URL: "https://s3-eu-west-1.amazonaws.com/artifactstorecsio/geoipdata/geoip-country.dat"
+    GEO_IP_CITY_COUNTRY6_URL: "https://s3-eu-west-1.amazonaws.com/artifactstorecsio/geoipdata/geoip-country6.dat"
